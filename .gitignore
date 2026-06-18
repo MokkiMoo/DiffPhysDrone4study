@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.so
+
+# Local training and evaluation artifacts. The code now writes these to
+# ../Outputs/DiffPhysDrone by default; keep accidental in-repo outputs out of git.
+/runs/
+/repro_runs/
+/validation_code/swarm/exps_*/
+
+# Large local validation assets from release packages.
+/validation_code/**/*.tar.gz
+/validation_code/**/*.zip
+/validation_code/**/LinuxNoEditor/
+/validation_code/**/.x11_display
+
+# Generated media, logs, and model checkpoints.
+*.mp4
+*.avi
+*.log
+*.pt
+*.pth
+*.ckpt

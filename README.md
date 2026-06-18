@@ -54,6 +54,11 @@ python main_cuda.py $(cat configs/multi_agent.args)
 python main_cuda.py $(cat configs/single_agent.args)
 ```
 
+By default, training checkpoints and TensorBoard logs are saved outside this
+repository under `../Outputs/DiffPhysDrone/train/<timestamp>_train/`.
+Set `DIFFPHYSDRONE_OUTPUT_ROOT` or pass `--output_root` to choose another output
+root.
+
 ## Evaluation
 You need to download the simulation validation code from the GitHub release page.
 To evaluate the trained model in multi-agent settings, use the following command to launch the simulator:
@@ -78,3 +83,8 @@ Then, run the following command to evaluate the trained model:
 ```bash
 python eval.py --resume <path to checkpoint> --target_speed 2.5
 ```
+
+By default, evaluation videos, logs, trajectories, and copied evaluation scripts
+are saved outside this repository under
+`../Outputs/DiffPhysDrone/eval/exps_<target_speed>/<timestamp>/` from the
+repository root.

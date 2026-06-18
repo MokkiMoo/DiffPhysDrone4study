@@ -1,5 +1,8 @@
 from collections import defaultdict
+from datetime import datetime
 import math
+import os
+from pathlib import Path
 from random import normalvariate
 from matplotlib import pyplot as plt
 from env_cuda import Env
@@ -12,6 +15,20 @@ from tqdm import tqdm
 
 import argparse
 from model import Model
+
+
+def default_output_root():
+    env_output_root = os.environ.get('DIFFPHYSDRONE_OUTPUT_ROOT')
+    if env_output_root:
+        return Path(env_output_root).expanduser().resolve()
+    return Path(__file__).resolve().parents[1] / 'Outputs' / 'DiffPhysDrone'
+
+
+def resolve_output_path(path, output_root):
+    path = Path(path).expanduser()
+    if path.is_absolute():
+        return path
+    return output_root / path
 
 
 parser = argparse.ArgumentParser()
@@ -41,9 +58,25 @@ parser.add_argument('--scaffold', default=False, action='store_true')
 parser.add_argument('--random_rotation', default=False, action='store_true')
 parser.add_argument('--yaw_drift', default=False, action='store_true')
 parser.add_argument('--no_odom', default=False, action='store_true')
+parser.add_argument('--output_root', default=None)
+parser.add_argument('--run_name', default=None)
+parser.add_argument('--checkpoint_dir', default=None)
+parser.add_argument('--tensorboard_dir', default=None)
+parser.add_argument('--checkpoint_interval', type=int, default=10000)
+parser.add_argument('--save_final', default=False, action='store_true')
 args = parser.parse_args()
-writer = SummaryWriter()
+
+output_root = resolve_output_path(args.output_root, Path.cwd()) if args.output_root else default_output_root()
+run_name = args.run_name or datetime.now().strftime('%Y%m%d_%H%M%S_train')
+run_dir = resolve_output_path(args.checkpoint_dir, output_root) if args.checkpoint_dir else output_root / 'train' / run_name
+tensorboard_dir = resolve_output_path(args.tensorboard_dir, output_root) if args.tensorboard_dir else run_dir / 'tensorboard'
+args.output_root = str(output_root)
+args.checkpoint_dir = str(run_dir)
+args.tensorboard_dir = str(tensorboard_dir)
+
+writer = SummaryWriter(log_dir=args.tensorboard_dir)
 print(args)
+os.makedirs(args.checkpoint_dir, exist_ok=True)
 
 device = torch.device('cuda')
 
@@ -268,9 +301,14 @@ for i in pbar:
             writer.add_figure('p_history', fig_p, i + 1)
             writer.add_figure('v_history', fig_v, i + 1)
             writer.add_figure('a_reals', fig_a, i + 1)
-        if (i + 1) % 10000 == 0:
-            torch.save(model.state_dict(), f'checkpoint{i//10000:04d}.pth')
+        if args.checkpoint_interval > 0 and (i + 1) % args.checkpoint_interval == 0:
+            torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, f'checkpoint{i//args.checkpoint_interval:04d}.pth'))
         if (i + 1) % 25 == 0:
             for k, v in scaler_q.items():
                 writer.add_scalar(k, sum(v) / len(v), i + 1)
             scaler_q.clear()
+
+if args.save_final:
+    torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, f'checkpoint_final_{args.num_iters:06d}.pth'))
+
+writer.close()
