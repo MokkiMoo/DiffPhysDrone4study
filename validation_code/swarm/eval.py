@@ -7,6 +7,7 @@ from pathlib import Path
 import random
 import signal
 import subprocess
+import sys
 from time import sleep, time
 import airsim
 from airsim.types import Pose, Vector3r, Quaternionr
@@ -61,6 +62,10 @@ class Rate:
 
 import torch
 import torch.nn.functional as F
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from model import Model
 
@@ -132,6 +137,9 @@ parser.add_argument('--screen_display', default=os.environ.get('DISPLAY', ':0'))
 parser.add_argument('--screen_offset', default='512,340')
 parser.add_argument('--screen_encoder', default='h264_nvenc')
 parser.add_argument('--scene_object_pattern', default='1M_Cube_Chamfer.*')
+parser.add_argument('--no_traj_video', default=False, action='store_true')
+parser.add_argument('--traj_video_fps', type=int, default=15)
+parser.add_argument('--traj_video_side_view', default=False, action='store_true')
 parser.add_argument('--output_root', default=None)
 parser.add_argument('--log_dir', default=None)
 
@@ -340,7 +348,7 @@ def main():
         R = torch.stack([fwd, torch.cross(up, fwd), up], -1)
 
         # state (in body frame): cat(velocity estimation, velocity target, rotation matrix, margin)
-        state = [torch.squeeze(target_v[:, None] @ R, 1), R[:, 2], extra]
+        state = [torch.squeeze(target_v[:, None] @ R, 1), env_R[:, 2], extra]
         local_v = torch.squeeze(v[:, None] @ R, 1)
         if not args.no_odom:
             state.insert(0, local_v)
@@ -420,9 +428,11 @@ if __name__ == '__main__':
         ], stdin=subprocess.PIPE)
 
     def cleanup():
-        with open(f"{log_dir}/traj_history.json", 'w') as f:
+        traj_history_path = Path(log_dir) / 'traj_history.json'
+        scene_objects_path = Path(log_dir) / 'scene_objects.json'
+        with open(traj_history_path, 'w') as f:
             json.dump(traj_history, f)
-        with open(f"{log_dir}/scene_objects.json", 'w') as f:
+        with open(scene_objects_path, 'w') as f:
             json.dump(scene_objects, f)
         if ffmpeg_p is not None:
             try:
@@ -431,6 +441,26 @@ if __name__ == '__main__':
                 pass
             ffmpeg_p.wait()
         depth_recorder.close()
+        if args.no_traj_video or not any(traj_history.values()):
+            return
+
+        plot_script = Path(__file__).resolve().with_name('plot_traj.py')
+        command = [
+            sys.executable,
+            str(plot_script),
+            str(traj_history_path),
+            '--scene_objects',
+            str(scene_objects_path),
+            '--fps',
+            str(args.traj_video_fps),
+        ]
+        if args.traj_video_side_view:
+            command.append('--side_view')
+        try:
+            print(f'generating trajectory video from {traj_history_path}')
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f'failed to generate trajectory video: {e}')
 
     print("start recording")
 
