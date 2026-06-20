@@ -2,10 +2,16 @@ __pycache__/
 *.py[cod]
 *.so
 
-# Local training and evaluation artifacts. The code now writes these to
-# ../Outputs/DiffPhysDrone by default; keep accidental in-repo outputs out of git.
+# Local training and evaluation artifacts. The code writes these to
+# ../output/DiffphysDrone by default; keep accidental in-repo outputs out of git.
+/output/
+/Outputs/
 /runs/
 /repro_runs/
+/train/
+/eval/
+/checkpoints/
+/tensorboard/
 /validation_code/swarm/exps_*/
 
 # Large local validation assets from release packages.

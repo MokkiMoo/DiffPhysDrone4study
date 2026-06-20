@@ -21,7 +21,7 @@ def default_output_root():
     env_output_root = os.environ.get('DIFFPHYSDRONE_OUTPUT_ROOT')
     if env_output_root:
         return Path(env_output_root).expanduser().resolve()
-    return Path(__file__).resolve().parents[1] / 'Outputs' / 'DiffPhysDrone'
+    return Path(__file__).resolve().parents[1] / 'output' / 'DiffphysDrone'
 
 
 def resolve_output_path(path, output_root):
@@ -29,6 +29,16 @@ def resolve_output_path(path, output_root):
     if path.is_absolute():
         return path
     return output_root / path
+
+
+def ensure_outside_repo(path, label):
+    repo_root = Path(__file__).resolve().parent
+    resolved = Path(path).expanduser().resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError:
+        return resolved
+    raise ValueError(f'{label} must be outside the repository: {resolved}')
 
 
 parser = argparse.ArgumentParser()
@@ -67,9 +77,12 @@ parser.add_argument('--save_final', default=False, action='store_true')
 args = parser.parse_args()
 
 output_root = resolve_output_path(args.output_root, Path.cwd()) if args.output_root else default_output_root()
+output_root = ensure_outside_repo(output_root, 'output_root')
 run_name = args.run_name or datetime.now().strftime('%Y%m%d_%H%M%S_train')
 run_dir = resolve_output_path(args.checkpoint_dir, output_root) if args.checkpoint_dir else output_root / 'train' / run_name
 tensorboard_dir = resolve_output_path(args.tensorboard_dir, output_root) if args.tensorboard_dir else run_dir / 'tensorboard'
+run_dir = ensure_outside_repo(run_dir, 'checkpoint_dir')
+tensorboard_dir = ensure_outside_repo(tensorboard_dir, 'tensorboard_dir')
 args.output_root = str(output_root)
 args.checkpoint_dir = str(run_dir)
 args.tensorboard_dir = str(tensorboard_dir)

@@ -36,16 +36,16 @@ During execution, the system will output the task completion time for each agent
 
 By default, generated videos, logs, trajectories, and copied evaluation scripts
 are saved outside this repository under
-`../../../Outputs/DiffPhysDrone/eval/exps_<target_speed>/<timestamp>/`.
+`../../../output/DiffphysDrone/eval/exps_<target_speed>/<timestamp>/`.
 
 We provide the script `batch_test.sh` for conducting 10 sequential runs of the simulation.
 
 ## Viewing Test Results and Videos
 
-Example test results with videos demonstrations are provided in `./exps_2.5`, such as `exps_2.5/20240225_145242/20240225_145242.mp4`. Newly generated results are written to `../../../Outputs/DiffPhysDrone/eval/`. To view a comprehensive log of new test results, use the following command:
+Example test results with videos demonstrations are provided in `./exps_2.5`, such as `exps_2.5/20240225_145242/20240225_145242.mp4`. Newly generated results are written to `../../../output/DiffphysDrone/eval/`. To view a comprehensive log of new test results, use the following command:
 
 ```bash
-tail ../../../Outputs/DiffPhysDrone/eval/exps_*/*/log
+tail ../../../output/DiffphysDrone/eval/exps_*/*/log
 ```
 
 This command will display the latest entries from the log files of all experiments, allowing you to review the outcomes of each simulation run.

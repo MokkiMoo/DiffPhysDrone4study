@@ -68,7 +68,7 @@ def default_output_root():
     env_output_root = os.environ.get('DIFFPHYSDRONE_OUTPUT_ROOT')
     if env_output_root:
         return Path(env_output_root).expanduser().resolve()
-    return Path(__file__).resolve().parents[3] / 'Outputs' / 'DiffPhysDrone'
+    return Path(__file__).resolve().parents[3] / 'output' / 'DiffphysDrone'
 
 
 def resolve_output_path(path, output_root):
@@ -76,6 +76,16 @@ def resolve_output_path(path, output_root):
     if path.is_absolute():
         return path
     return output_root / path
+
+
+def ensure_outside_repo(path, label):
+    repo_root = Path(__file__).resolve().parents[2]
+    resolved = Path(path).expanduser().resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError:
+        return resolved
+    raise ValueError(f'{label} must be outside the repository: {resolved}')
 
 
 def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
@@ -132,7 +142,9 @@ hover_thr = 0.297
 # hover_thr = 0.593
 datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 output_root = resolve_output_path(args.output_root, Path.cwd()) if args.output_root else default_output_root()
+output_root = ensure_outside_repo(output_root, 'output_root')
 log_dir_path = resolve_output_path(args.log_dir, output_root) if args.log_dir else output_root / 'eval' / f'exps_{args.target_speed}' / datetime_str
+log_dir_path = ensure_outside_repo(log_dir_path, 'log_dir')
 args.output_root = str(output_root)
 args.log_dir = str(log_dir_path)
 log_dir = args.log_dir

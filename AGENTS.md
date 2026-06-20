@@ -13,7 +13,7 @@ This repository contains vision-based agile flight training code with a compact 
 - `cd validation_code/swarm && ./run_sim_x11.sh`: launches the AirSim validation simulator when the downloaded simulator package is present.
 - `cd validation_code/swarm && python eval.py --resume swarm.pth --target_speed 2.5`: evaluates a trained swarm checkpoint.
 
-Training and evaluation outputs are written outside the repository by default under `../Outputs/DiffPhysDrone/`. Use `DIFFPHYSDRONE_OUTPUT_ROOT` or `--output_root` to redirect generated checkpoints, logs, and videos.
+Training and evaluation outputs are written outside the repository by default under `../output/DiffphysDrone/`. Use `DIFFPHYSDRONE_OUTPUT_ROOT` or `--output_root` to redirect generated checkpoints, logs, and videos.
 
 ## Coding Style & Naming Conventions
 
