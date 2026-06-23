@@ -1,0 +1,10 @@
+
+
+
+   python -m diffphys_drone_mjlab.play_checkpoint \
+    --resume ../output/DiffphysDrone/train/full_eval_fix/checkpoint_final_050000.pth \
+    --num-envs 1 \
+    --device cuda \
+    --viewer viser \
+    --policy-frame target \
+    --max-speed 5

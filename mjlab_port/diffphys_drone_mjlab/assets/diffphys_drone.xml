@@ -1,0 +1,33 @@
+<mujoco model="diffphys_drone">
+  <compiler angle="radian" autolimits="true"/>
+
+  <default>
+    <geom rgba="0.45 0.48 0.52 1" contype="1" conaffinity="1"/>
+    <site size="0.015" rgba="0.95 0.15 0.1 1"/>
+  </default>
+
+  <worldbody>
+    <body name="base" pos="0 0 1">
+      <freejoint name="root"/>
+      <inertial pos="0 0 0" mass="1.0" diaginertia="0.012 0.012 0.022"/>
+
+      <geom name="collision_envelope" type="sphere" size="0.15" rgba="0.05 0.7 0.95 0.18" group="3"/>
+      <geom name="body_vis" type="box" size="0.12 0.08 0.025" rgba="0.18 0.28 0.78 1" contype="0" conaffinity="0" group="2"/>
+      <geom name="arm_x_vis" type="box" size="0.18 0.015 0.012" rgba="0.18 0.18 0.2 1" contype="0" conaffinity="0" group="2"/>
+      <geom name="arm_y_vis" type="box" size="0.015 0.18 0.012" rgba="0.18 0.18 0.2 1" contype="0" conaffinity="0" group="2"/>
+
+      <site name="camera_site" pos="0.11 0 0.015" quat="0.5 -0.5 -0.5 0.5"/>
+      <camera name="front_depth_cam" pos="0.11 0 0.015" quat="0.5 -0.5 -0.5 0.5" fovy="43.36" resolution="64 48"/>
+
+      <site name="rotor_fl" pos="0.18 0.18 0"/>
+      <site name="rotor_fr" pos="0.18 -0.18 0"/>
+      <site name="rotor_rl" pos="-0.18 0.18 0"/>
+      <site name="rotor_rr" pos="-0.18 -0.18 0"/>
+
+      <geom name="rotor_fl_vis" type="cylinder" size="0.055 0.004" pos="0.18 0.18 0" rgba="0.85 0.1 0.08 0.7" contype="0" conaffinity="0" group="2"/>
+      <geom name="rotor_fr_vis" type="cylinder" size="0.055 0.004" pos="0.18 -0.18 0" rgba="0.85 0.1 0.08 0.7" contype="0" conaffinity="0" group="2"/>
+      <geom name="rotor_rl_vis" type="cylinder" size="0.055 0.004" pos="-0.18 0.18 0" rgba="0.85 0.1 0.08 0.7" contype="0" conaffinity="0" group="2"/>
+      <geom name="rotor_rr_vis" type="cylinder" size="0.055 0.004" pos="-0.18 -0.18 0" rgba="0.85 0.1 0.08 0.7" contype="0" conaffinity="0" group="2"/>
+    </body>
+  </worldbody>
+</mujoco>
